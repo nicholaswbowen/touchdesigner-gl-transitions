@@ -4,6 +4,9 @@
 uniform float reflection; // = 0.4
 uniform float perspective; // = 0.2
 uniform float depth; // = 3.0
+uniform float progress;
+
+out vec4 fragColor;
  
 const vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
 const vec2 boundMin = vec2(0.0, 0.0);
@@ -21,16 +24,17 @@ vec4 bgColor (vec2 p, vec2 pfr, vec2 pto) {
   vec4 c = black;
   pfr = project(pfr);
   if (inBounds(pfr)) {
-    c += mix(black, getFromColor(pfr), reflection * mix(1.0, 0.0, pfr.y));
+    c += mix(black, texture(sTD2DInputs[0] , pfr), reflection * mix(1.0, 0.0, pfr.y));
   }
   pto = project(pto);
   if (inBounds(pto)) {
-    c += mix(black, getToColor(pto), reflection * mix(1.0, 0.0, pto.y));
+    c += mix(black, texture(sTD2DInputs[1] , pto), reflection * mix(1.0, 0.0, pto.y));
   }
   return c;
 }
  
-vec4 transition(vec2 p) {
+vec4 transition() {
+  vec2 p = vUV.xy/vec2(1.0).xy;
   vec2 pfr, pto = vec2(-1.);
  
   float size = mix(1.0, depth, progress);
@@ -43,17 +47,23 @@ vec4 transition(vec2 p) {
 
   if (progress < 0.5) {
     if (inBounds(pfr)) {
-      return getFromColor(pfr);
+      return texture(sTD2DInputs[0] , pfr);
     }
     if (inBounds(pto)) {
-      return getToColor(pto);
+      return texture(sTD2DInputs[1] , pto);
     }  
   }
   if (inBounds(pto)) {
-    return getToColor(pto);
+    return texture(sTD2DInputs[1] , pto);
   }
   if (inBounds(pfr)) {
-    return getFromColor(pfr);
+    return texture(sTD2DInputs[0] , pfr);
   }
   return bgColor(p, pfr, pto);
+}
+
+void main()
+{
+	vec4 color = transition();
+	fragColor = TDOutputSwizzle(color);
 }

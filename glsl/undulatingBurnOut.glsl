@@ -8,6 +8,10 @@ uniform vec3 color; // = vec3(0.0)
 
 const float M_PI = 3.14159265358979323846;
 
+uniform float progress;
+
+out vec4 fragColor;
+
 float quadraticInOut(float t) {
   float p = 2.0 * t * t;
   return t < 0.5 ? p : -p + (4.0 * t) - 1.0;
@@ -38,10 +42,18 @@ float getWave(vec2 p){
   return x + deg_wave_pos;
 }
 
-vec4 transition(vec2 p) {
+vec4 transition() {
+
+vec2 p = vUV.xy/vec2(1.0).xy;
   float dist = distance(center, p);
   float m = getGradient(getWave(p), dist);
-  vec4 cfrom = getFromColor(p);
-  vec4 cto = getToColor(p);
+  vec4 cfrom = texture(sTD2DInputs[0], p);
+  vec4 cto = texture(sTD2DInputs[1], p);
   return mix(mix(cfrom, cto, m), mix(cfrom, vec4(color, 1.0), 0.75), step(m, -2.0));
+}
+
+void main()
+{
+	vec4 color = transition();
+	fragColor = TDOutputSwizzle(color);
 }

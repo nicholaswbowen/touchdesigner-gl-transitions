@@ -1,9 +1,12 @@
 // Author: Rich Harris
 // License: MIT
 
-#ifdef GL_ES
-precision mediump float;
-#endif
+precision mediump int; 
+precision highp float;
+
+uniform float progress;
+
+out vec4 fragColor;
 
 uniform float scale; // = 4.0
 uniform float smoothness; // = 0.01
@@ -45,10 +48,10 @@ float noise (in vec2 st) {
             (d - b) * u.x * u.y;
 }
 
-vec4 transition (vec2 uv) {
-  vec4 from = getFromColor(uv);
-  vec4 to = getToColor(uv);
-  float n = noise(uv * scale);
+vec4 transition () {
+  vec4 from = texture(sTD2DInputs[0] , vUV.st);
+  vec4 to = texture(sTD2DInputs[1] , vUV.st);
+  float n = noise(vUV.st * scale);
   
   float p = mix(-smoothness, 1.0 + smoothness, progress);
   float lower = p - smoothness;
@@ -61,4 +64,10 @@ vec4 transition (vec2 uv) {
     to,
     1.0 - q
   );
+}
+
+void main()
+{
+	vec4 color = transition();
+	fragColor = TDOutputSwizzle(color);
 }

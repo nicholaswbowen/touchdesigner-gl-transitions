@@ -5,17 +5,27 @@
 
 uniform float startingAngle; // = 90;
 
-vec4 transition (vec2 uv) {
+uniform float progress;
+
+out vec4 fragColor;
+
+vec4 transition () {
   
   float offset = startingAngle * PI / 180.0;
-  float angle = atan(uv.y - 0.5, uv.x - 0.5) + offset;
+  float angle = atan(vUV.y - 0.5, vUV.x - 0.5) + offset;
   float normalizedAngle = (angle + PI) / (2.0 * PI);
   
   normalizedAngle = normalizedAngle - floor(normalizedAngle);
 
   return mix(
-    getFromColor(uv),
-    getToColor(uv),
+    texture(sTD2DInputs[0] , vUV.st),
+    texture(sTD2DInputs[1] , vUV.st),
     step(normalizedAngle, progress)
     );
+}
+
+void main()
+{
+	vec4 color = transition();
+	fragColor = TDOutputSwizzle(color);
 }

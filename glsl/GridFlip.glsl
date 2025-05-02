@@ -7,6 +7,10 @@ uniform float pause; // = 0.1
 uniform float dividerWidth; // = 0.05
 uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
 uniform float randomness; // = 0.1
+
+uniform float progress;
+
+out vec4 fragColor;
  
 float rand (vec2 co) {
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -29,14 +33,16 @@ float getDividerSize() {
   return min(rectangleSize.x, rectangleSize.y) * dividerWidth;
 }
 
-vec4 transition(vec2 p) {
+vec4 transition() {
+
+vec2 p = vUV.xy/vec2(1.0).xy;
   if(progress < pause) {
     float currentProg = progress / pause;
     float a = 1.0;
     if(getDelta(p) < getDividerSize()) {
       a = 1.0 - currentProg;
     }
-    return mix(bgcolor, getFromColor(p), a);
+    return mix(bgcolor, texture(sTD2DInputs[0], p), a);
   }
   else if(progress < 1.0 - pause){
     if(getDelta(p) < getDividerSize()) {
@@ -54,8 +60,8 @@ vec4 transition(vec2 p) {
       float offset = rectangleSize / 2.0 + delta;
       
       p.x = (p.x - offset)/abs(cp - 0.5)*0.5 + offset;
-      vec4 a = getFromColor(p);
-      vec4 b = getToColor(p);
+      vec4 a = texture(sTD2DInputs[0], p);
+      vec4 b = texture(sTD2DInputs[1], p);
       
       float s = step(abs(vec2(size).x * (q.x - delta) - 0.5), abs(cp - 0.5));
       return mix(bgcolor, mix(b, a, step(cp, 0.5)), s);
@@ -67,6 +73,12 @@ vec4 transition(vec2 p) {
     if(getDelta(p) < getDividerSize()) {
       a = currentProg;
     }
-    return mix(bgcolor, getToColor(p), a);
+    return mix(bgcolor, texture(sTD2DInputs[1], p), a);
   }
+}
+
+void main()
+{
+	vec4 color = transition();
+	fragColor = TDOutputSwizzle(color);
 }

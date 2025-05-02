@@ -3,12 +3,17 @@
 // ( http://www.linderdaum.com )
 // ported by gre from https://gist.github.com/corporateshark/cacfedb8cca0f5ce3f7c
 
-vec4 transition(vec2 UV)
+uniform float progress;
+
+out vec4 fragColor;
+
+vec4 transition()
 {
 	float Radius = 1.0;
 
 	float T = progress;
 
+	vec2 UV = vUV.st;
 	UV -= vec2( 0.5, 0.5 );
 
 	float Dist = length(UV);
@@ -24,8 +29,14 @@ vec4 transition(vec2 UV)
 	}
 	UV += vec2( 0.5, 0.5 );
 
-	vec4 C0 = getFromColor(UV);
-	vec4 C1 = getToColor(UV);
+	vec4 C0 = texture(sTD2DInputs[0] , UV);
+	vec4 C1 = texture(sTD2DInputs[1] , UV);
 
 	return mix( C0, C1, T );
+}
+
+void main()
+{
+	vec4 color = transition();
+	fragColor = TDOutputSwizzle(color);
 }

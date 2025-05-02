@@ -2,8 +2,15 @@
 // License: MIT
 // Hexagonal math from: http://www.redblobgames.com/grids/hexagons/
 
+uniform float progress;
+
+out vec4 fragColor;
+
 uniform int steps; // = 50;
 uniform float horizontalHexagons; //= 20;
+
+vec2 res = uTD2DInfos[0].res.zw;
+float ratio = res.x / res.y;
 
 struct Hexagon {
   float q;
@@ -60,15 +67,21 @@ vec2 pointFromHexagon(Hexagon hex, float size) {
   return vec2(x, y * ratio);
 }
 
-vec4 transition (vec2 uv) {
+vec4 transition () {
   
   float dist = 2.0 * min(progress, 1.0 - progress);
   dist = steps > 0 ? ceil(dist * float(steps)) / float(steps) : dist;
   
   float size = (sqrt(3.0) / 3.0) * dist / horizontalHexagons;
   
-  vec2 point = dist > 0.0 ? pointFromHexagon(hexagonFromPoint(uv, size), size) : uv;
+  vec2 point = dist > 0.0 ? pointFromHexagon(hexagonFromPoint(vUV.st, size), size) : vUV.st;
 
-  return mix(getFromColor(point), getToColor(point), progress);
+  return mix(texture(sTD2DInputs[0], point), texture(sTD2DInputs[1], point), progress);
   
+}
+
+void main()
+{
+	vec4 color = transition();
+	fragColor = TDOutputSwizzle(color);
 }
