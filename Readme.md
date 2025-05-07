@@ -7,4 +7,6 @@ These .tox files contain components that each implement a shader from the gl-tra
 
 ### Getting Started
 
-Every transition has a parameter called progress that controls the progress of the effect, and many have additional 
+You can pick up the tox files by downloading them from the [releases page](https://github.com/nicholaswbowen/touchdesigner-gl-transitions/releases)  and drag the tox files in individully or add them to your palette.
+
+Every transition has a parameter called progress that fades the effect from a to b, and many have additional ones, depending on the effect. 
